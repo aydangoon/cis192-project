@@ -1,4 +1,5 @@
 import base64
+import time
 from user_data import UserData
 import json
 from flask import request
@@ -8,9 +9,10 @@ import os
 
 CLIENT_ID = '4d3f871c854b41d1ac57aa40321a98cf'
 CLIENT_SECRET = os.environ.get("SPOTIFY_CLIENT_SECRET")
-SCOPE = 'user-read-private user-read-email'
+SCOPE = 'user-read-private user-read-email user-top-read'
 AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
+BASE_API_URL = 'https://api.spotify.com/v1'
 FRONTEND_URL = "http://localhost:3000/"
 
 def get_connect_account_url():
@@ -93,4 +95,26 @@ def get_user_data(access_token: str) -> UserData:
 
     Returns: UserData object which contains all the user's relevant listening information.
     """
-    pass
+    
+    # profile info
+    headers = { 'Authorization': f'Bearer {access_token}' }
+    res = requests.get(BASE_API_URL + '/me', headers=headers)
+    data = json.loads(res.text)
+    user = UserData(data)
+
+    # top artists
+    time.sleep(1) # rate limit
+    res = requests.get(BASE_API_URL + '/me/top/artists?time_range=medium_term&limit=50&offset=0', headers=headers)
+    data = json.loads(res.text)
+    user.set_top_artists(data["items"])
+    print(user.top_artists)
+    # top genres
+    time.sleep(1) # rate limit
+    user.set_top_genres(data["items"])
+    print(user.top_genres)
+    # top tracks
+    res = requests.get(BASE_API_URL + '/me/top/tracks?time_range=medium_term&limit=50&offset=0', headers=headers)
+    data = json.loads(res.text)
+    user.set_top_tracks(data["items"])
+    print(user.top_tracks)
+    return user

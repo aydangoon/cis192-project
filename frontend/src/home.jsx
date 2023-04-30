@@ -1,12 +1,15 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useHistory } from 'react-router-dom'
 import { AppContext } from './App'
 import { useContext, useEffect, useState } from 'react'
 import api from './api'
 const Home = () => {
     const [appContext, setAppContext] = useContext(AppContext)
     const location = useLocation()
+    const history = useHistory()
     const queryParams = new URLSearchParams(location.search)
     const code = queryParams.get('code')
+    const join = queryParams.get('join')
+    if (join && appContext.sid) history.push(`/match/${join}`)
 
     const [data, setData] = useState(null)
     const [error, setError] = useState(null)
@@ -39,8 +42,12 @@ const Home = () => {
     }
 
     const createMatch = async () => {
-        await api.create_match().then(({ match_id }) => {
-            window.location.href = `/match/${match_id}`
+        await api.create_match(appContext.sid).then(({ match_id, error }) => {
+            if (error) {
+                setError(error)
+            } else {
+                history.push(`/match/${match_id}`)
+            }
         })
     }
 
