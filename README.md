@@ -33,3 +33,8 @@ Internally, the data will be stored with a pandas dataframe.
 - `numpy`: to easily manipulate and organize metrics data to be sent to the frontend.
 - `pandas`: to store spotify-authenticated users who have pending, or completed match invites
   as well as the compatibility results of those matches.
+
+### Running the app
+
+Unfortunately you can't run the app because its directly tied to my spotify developer account :(
+But I've attached a video explaining how it works.
